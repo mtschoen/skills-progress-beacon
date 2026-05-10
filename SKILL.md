@@ -11,19 +11,35 @@ makes that possible by having you emit a small machine-readable progress
 beacon at key moments. The status line parses it and shows the figure plus
 a calibrated estimate from historical sessions.
 
-## When to use this skill
+## First action requirement (DEFAULT-ON)
 
-Apply on the FIRST substantive action of any turn that meets ANY of these
-criteria:
+For any non-trivial turn — defined by the criteria below — your VERY FIRST
+substantive action is emitting a `<progress-beacon> {"kind": "begin", ...}`
+block in your assistant message text. Not after a few tool calls. Not "once
+I have a clearer estimate." First.
+
+If you've already dispatched a tool call without emitting a begin beacon
+and the turn is non-trivial, emit the begin beacon in your NEXT assistant
+message before further tool calls. Recovery is fine; silent omission is not.
+
+The skill is silent ONLY for turns that are *clearly* trivial — one-line
+answers, simple Q&A, single-file lookups, exploratory dialog like
+brainstorming. Borderline → emit. The cost of an unneeded `begin` is one
+fenced block; the cost of a missing one is a user staring at a blank
+status line for 20 minutes.
+
+## Non-trivial turn criteria
+
+A turn meets the threshold if ANY of these hold:
 
 - The task involves multi-file edits.
 - The task involves multi-step research or planning.
 - You will dispatch subagents.
 - You'd ballpark the turn at >2 minutes of wall-clock work.
 
-If none of those apply (one-line answers, simple Q&A, single-file lookups,
-exploratory dialog like brainstorming), the skill is silent — do not emit
-a beacon.
+Trivial-skip applies only when NONE of these hold AND the turn is plainly
+a one-shot. Don't talk yourself out of a beacon by reframing a multi-step
+task as "really just one thing."
 
 ## Beacon format
 
