@@ -47,7 +47,7 @@ else
         fi
     done
     if [[ -n "$jsonl" ]]; then
-        first_ts="$(jq -r 'select(.timestamp) | .timestamp' "$jsonl" 2>/dev/null | head -1)"
+        first_ts="$(jq -r 'select(.timestamp) | .timestamp' "$jsonl" 2>/dev/null | head -1 || true)"
         if [[ -n "$first_ts" ]]; then
             first_epoch="$(date -d "$first_ts" +%s 2>/dev/null || echo 0)"
             now_epoch="$(date +%s)"
