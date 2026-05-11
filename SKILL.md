@@ -18,6 +18,15 @@ substantive action is emitting a `<progress-beacon> {"kind": "begin", ...}`
 block in your assistant message text. Not after a few tool calls. Not "once
 I have a clearer estimate." First.
 
+**This applies to every non-trivial turn, not just the first turn of the
+session.** A "turn" = one user prompt + the agent's response to it. If the
+previous turn ended with `kind=end` (or had no beacon at all), the next
+non-trivial turn opens a brand new lifecycle with a fresh `begin`. Do NOT
+skip straight to `report` thinking the work is "continuing" — the status
+line treats `end` as a hard lifecycle terminator and will render a loud
+red `⏱ no begin` until you emit one. The UserPromptSubmit hook reminds
+you when the prior turn closed with an end; act on it.
+
 If you've already dispatched a tool call without emitting a begin beacon
 and the turn is non-trivial, emit the begin beacon in your NEXT assistant
 message before further tool calls. Recovery is fine; silent omission is not.
@@ -65,9 +74,13 @@ for future use.
 
 ## Lifecycle
 
+Each non-trivial turn is its own self-contained lifecycle: `begin` →
+zero-or-more `report`s → `end`. The next turn opens a fresh lifecycle.
+Don't carry an old `begin` across turn boundaries.
+
 - **First substantive action of the turn** → emit `kind: "begin"` with
-  your initial estimate. This anchors the original ETA that drift is
-  measured against.
+  your initial estimate. This anchors the ETA for THIS turn. Drift is
+  measured against this anchor, not any earlier turn's begin.
 - **Periodically during work** → emit `kind: "report"` beacons. Cadence
   is fuzzy ("every so often"), with a HARD BACKSTOP: never let more than
   ~5 minutes of wall-clock pass without a beacon. If you notice you've
@@ -75,7 +88,11 @@ for future use.
   time, that's the moment to come up for air NOW, not at some later
   "natural" break point.
 - **End of substantive work** → emit `kind: "end"` with final summary.
-  Status line clears the figure.
+  Status line clears the figure. The lifecycle is now closed; the NEXT
+  non-trivial turn requires a new `begin`. A `report` emitted after an
+  `end` with no intervening `begin` will render as `⏱ no begin` — the
+  status line is telling you to fix the omission, not retroactively
+  reuse the previous turn's anchor.
 
 ## Drift judgement
 
