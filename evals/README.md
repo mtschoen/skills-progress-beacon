@@ -21,6 +21,7 @@ contract so the grader can be wired against stable case IDs.
 Run each case as a `claude -p` invocation against a sandbox cwd, capture
 the assistant transcript, regex-extract `<progress-beacon>` blocks,
 parse the JSON, and assert on:
+
 - presence/absence of begin/report/end beacons
 - summary length, drift state, kind sequence
 - recency-nudge hook firing (or not) when the harness fakes wall-clock advancement

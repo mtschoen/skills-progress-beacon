@@ -8,7 +8,7 @@ a calibrated "when can I close my laptop?" status-line render.
 The skill (`SKILL.md`) tells the agent to periodically emit a small
 machine-readable JSON block in its assistant message text:
 
-```
+```text
 <progress-beacon>
 {"kind": "begin", "eta_seconds": 720, "summary": "auth refactor", "drift": "nominal"}
 </progress-beacon>

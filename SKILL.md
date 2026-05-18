@@ -54,19 +54,21 @@ task as "really just one thing."
 
 Every beacon is a fenced block in your assistant message text:
 
-```
+```text
 <progress-beacon>
 {"kind": "begin", "eta_seconds": 180, "summary": "running tests then committing", "drift": "nominal"}
 </progress-beacon>
 ```
 
 Required fields:
+
 - `kind`: `"begin"` | `"report"` | `"end"`.
 - `eta_seconds`: wall-clock seconds remaining. Use 0 for `kind: "end"`.
 - `summary`: one-line human description, ≤80 chars.
 - `drift`: `"nominal"` | `"moderate"` | `"material"`.
 
 Optional:
+
 - `beats_left`: discrete steps remaining (when you have a confident count).
 
 Do NOT include `tokens_left`, `tasks`, or other fields — they're reserved
@@ -107,7 +109,7 @@ When entering `material` drift FROM A NON-MATERIAL STATE
 (`nominal → material` or `moderate → material`), prepend a loud in-line
 note in your same assistant message:
 
-```
+```text
 🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨
 
 ETA CREEP — was 15min, now looking like 45min.
@@ -147,7 +149,7 @@ worth surfacing.
 >
 > Agent: "Plan: read existing middleware, draft new version, update tests, run.
 >
-> ```
+> ```text
 > <progress-beacon>
 > {"kind": "begin", "eta_seconds": 720, "summary": "auth middleware JWT refactor", "drift": "nominal"}
 > </progress-beacon>
@@ -157,7 +159,7 @@ worth surfacing.
 >
 > Agent (5 minutes later, after writing new middleware): "Tests are running.
 >
-> ```
+> ```text
 > <progress-beacon>
 > {"kind": "report", "eta_seconds": 240, "summary": "tests running, ~4 min left", "drift": "nominal"}
 > </progress-beacon>
@@ -165,7 +167,8 @@ worth surfacing.
 >
 > Agent (final): "Done. Tests pass.
 >
-> ```
+> ```text
+>
 > <progress-beacon>
 > {"kind": "end", "eta_seconds": 0, "summary": "JWT refactor complete, all tests green", "drift": "nominal"}
 > </progress-beacon>
