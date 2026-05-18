@@ -23,6 +23,11 @@ A PostToolUse hook (`hooks/recency-nudge.sh`) injects an
 `additionalContext` reminder if the agent goes >5 minutes without a
 beacon during a turn that already started one.
 
+For the user-facing render — what each field on line 3 of the status
+line means, and how to read the wall-clock anchors, drift colors, and
+error states — see the **Line 3 (beacon)** section of the
+[schoen-claude-status README](https://github.com/mtschoen/schoen-claude-status#what-you-see).
+
 ## Installation (3 components)
 
 1. **The skill itself** — installed by skills-dev's installer:
