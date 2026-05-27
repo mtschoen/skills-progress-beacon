@@ -10,7 +10,7 @@ machine-readable JSON block in its assistant message text:
 
 ```text
 <progress-beacon>
-{"kind": "begin", "eta_seconds": 720, "summary": "auth refactor", "drift": "nominal"}
+{"kind": "begin", "eta_seconds": 720, "summary": "auth refactor"}
 </progress-beacon>
 ```
 
@@ -80,10 +80,12 @@ other entries.
 ## Beacon format
 
 Required fields: `kind` (`"begin"` | `"report"` | `"end"`),
-`eta_seconds` (number), `summary` (string ≤80 chars), `drift`
-(`"nominal"` | `"moderate"` | `"material"`).
+`eta_seconds` (number), `summary` (string ≤80 chars).
 
-Optional: `beats_left`. All other fields are reserved.
+Optional: `beats_left`. The `drift` field is deprecated — the status line
+now computes drift state objectively; the walker still accepts it for
+backward compatibility, but new beacons should omit it. All other fields
+are reserved.
 
 ## Layout
 

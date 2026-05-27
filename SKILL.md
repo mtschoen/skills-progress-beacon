@@ -56,7 +56,7 @@ Every beacon is a fenced block in your assistant message text:
 
 ```text
 <progress-beacon>
-{"kind": "begin", "eta_seconds": 180, "summary": "running tests then committing", "drift": "nominal"}
+{"kind": "begin", "eta_seconds": 180, "summary": "running tests then committing"}
 </progress-beacon>
 ```
 
@@ -65,11 +65,16 @@ Required fields:
 - `kind`: `"begin"` | `"report"` | `"end"`.
 - `eta_seconds`: wall-clock seconds remaining. Use 0 for `kind: "end"`.
 - `summary`: one-line human description, ≤80 chars.
-- `drift`: `"nominal"` | `"moderate"` | `"material"`.
 
 Optional:
 
 - `beats_left`: discrete steps remaining (when you have a confident count).
+
+`drift` is no longer emitted. The status line now computes drift state —
+and its color — objectively from elapsed-vs-original-eta (see "Surfacing
+ETA creep loudly" below), so a self-reported label added nothing. The
+walker still *accepts* a `drift` field for backward compatibility with
+already-installed agents, but new beacons should omit it.
 
 Do NOT include `tokens_left`, `tasks`, or other fields — they're reserved
 for future use.
@@ -96,18 +101,25 @@ Don't carry an old `begin` across turn boundaries.
   status line is telling you to fix the omission, not retroactively
   reuse the previous turn's anchor.
 
-## Drift judgement
+## Surfacing ETA creep loudly
 
-You decide the drift state, not math. Defaults:
+You no longer emit a drift label — the status line computes drift state
+(and its color) objectively from elapsed time vs. your original `begin`
+eta. But you are still responsible for flashing a loud in-line note when
+your own work has clearly blown past its estimate, so the user notices
+without having to stare at the status line.
 
-- `nominal`: current `eta_seconds` within 1.5× the original `begin`
-  estimate AND total elapsed under 30min.
-- `moderate`: 1.5×–2× the original, OR approaching 30min.
-- `material`: >2× the original, OR >30min absolute.
+Compute the trigger explicitly; don't self-assess a vibe. On each beacon,
+let `elapsed` = wall-clock seconds since THIS turn's `begin` and `eta` =
+your current `eta_seconds`. The turn has crossed the **material**
+threshold when:
 
-When entering `material` drift FROM A NON-MATERIAL STATE
-(`nominal → material` or `moderate → material`), prepend a loud in-line
-note in your same assistant message:
+```text
+(elapsed + eta) / original_begin_eta >= 2     OR     elapsed > 1800
+```
+
+When you cross that threshold FROM BELOW IT (the previous beacon was
+under it), prepend a loud in-line note in the same assistant message:
 
 ```text
 🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨
@@ -120,10 +132,9 @@ I call it here and write a handoff.
 🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨
 ```
 
-While drift stays `material` on consecutive beacons, do NOT re-flash the
-loud note. If drift recovers to `nominal`/`moderate` and later returns to
-`material`, the loud note fires again — that's a genuinely new event
-worth surfacing.
+Once you're over the threshold, do NOT re-flash the note on consecutive
+beacons. If your estimate recovers back under it and later crosses again,
+the loud note fires again — that's a genuinely new event worth surfacing.
 
 ## What this skill does NOT do
 
@@ -151,7 +162,7 @@ worth surfacing.
 >
 > ```text
 > <progress-beacon>
-> {"kind": "begin", "eta_seconds": 720, "summary": "auth middleware JWT refactor", "drift": "nominal"}
+> {"kind": "begin", "eta_seconds": 720, "summary": "auth middleware JWT refactor"}
 > </progress-beacon>
 > ```
 >
@@ -161,7 +172,7 @@ worth surfacing.
 >
 > ```text
 > <progress-beacon>
-> {"kind": "report", "eta_seconds": 240, "summary": "tests running, ~4 min left", "drift": "nominal"}
+> {"kind": "report", "eta_seconds": 240, "summary": "tests running, ~4 min left"}
 > </progress-beacon>
 > ```"
 >
@@ -170,6 +181,6 @@ worth surfacing.
 > ```text
 >
 > <progress-beacon>
-> {"kind": "end", "eta_seconds": 0, "summary": "JWT refactor complete, all tests green", "drift": "nominal"}
+> {"kind": "end", "eta_seconds": 0, "summary": "JWT refactor complete, all tests green"}
 > </progress-beacon>
 > ```"
