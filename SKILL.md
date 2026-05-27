@@ -97,11 +97,9 @@ Don't carry an old `begin` across turn boundaries.
 
 ## Surfacing ETA creep loudly
 
-The status line computes drift state and its color objectively, from
-elapsed time vs. your original `begin` eta — that part is not your job.
-But you are still responsible for flashing a loud in-line note when your
-own work has clearly blown past its estimate, so the user notices without
-having to stare at the status line.
+When your own work has clearly blown past its original estimate, flash a
+loud in-line note so the user notices without having to stare at the
+status line.
 
 Compute the trigger explicitly; don't self-assess a vibe. On each beacon,
 let `elapsed` = wall-clock seconds since THIS turn's `begin` and `eta` =
