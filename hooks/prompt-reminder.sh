@@ -30,7 +30,7 @@ if [[ "$beacon_kind" == "begin" || "$beacon_kind" == "report" ]]; then
     exit 0
 fi
 
-reminder="progress-beacon reminder: if this turn is non-trivial (multi-file edits, multi-step research, dispatching subagents, or >2 minutes wall-clock), your FIRST substantive action MUST be emitting a <progress-beacon> {\"kind\": \"begin\", \"eta_seconds\": N, \"summary\": \"...\", \"drift\": \"nominal\"} block in your assistant message text. Periodic 'report' beacons during work; 'end' beacon when finished. Trivial turns (one-line answers, single-file lookups, simple Q&A) skip the beacon entirely."
+reminder="progress-beacon reminder: if this turn is non-trivial (multi-file edits, multi-step research, dispatching subagents, or >2 minutes wall-clock), your FIRST substantive action MUST be emitting a <progress-beacon> {\"kind\": \"begin\", \"eta_seconds\": N, \"summary\": \"...\"} block in your assistant message text. Periodic 'report' beacons during work; 'end' beacon when finished. Trivial turns (one-line answers, single-file lookups, simple Q&A) skip the beacon entirely."
 
 jq -n --arg msg "$reminder" '{
     hookSpecificOutput: {
