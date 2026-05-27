@@ -82,10 +82,10 @@ other entries.
 Required fields: `kind` (`"begin"` | `"report"` | `"end"`),
 `eta_seconds` (number), `summary` (string ≤80 chars).
 
-Optional: `beats_left`. The `drift` field is deprecated — the status line
-now computes drift state objectively; the walker still accepts it for
-backward compatibility, but new beacons should omit it. All other fields
-are reserved.
+Optional: `beats_left`. All other fields are reserved. Beacons carry no
+`drift` field — the status line computes drift state and color objectively
+from elapsed-vs-eta. (The walker still tolerates a stray `drift` for
+backward compatibility with not-yet-reinstalled agents.)
 
 ## Layout
 

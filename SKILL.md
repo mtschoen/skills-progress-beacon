@@ -70,12 +70,6 @@ Optional:
 
 - `beats_left`: discrete steps remaining (when you have a confident count).
 
-`drift` is no longer emitted. The status line now computes drift state —
-and its color — objectively from elapsed-vs-original-eta (see "Surfacing
-ETA creep loudly" below), so a self-reported label added nothing. The
-walker still *accepts* a `drift` field for backward compatibility with
-already-installed agents, but new beacons should omit it.
-
 Do NOT include `tokens_left`, `tasks`, or other fields — they're reserved
 for future use.
 
@@ -103,11 +97,11 @@ Don't carry an old `begin` across turn boundaries.
 
 ## Surfacing ETA creep loudly
 
-You no longer emit a drift label — the status line computes drift state
-(and its color) objectively from elapsed time vs. your original `begin`
-eta. But you are still responsible for flashing a loud in-line note when
-your own work has clearly blown past its estimate, so the user notices
-without having to stare at the status line.
+The status line computes drift state and its color objectively, from
+elapsed time vs. your original `begin` eta — that part is not your job.
+But you are still responsible for flashing a loud in-line note when your
+own work has clearly blown past its estimate, so the user notices without
+having to stare at the status line.
 
 Compute the trigger explicitly; don't self-assess a vibe. On each beacon,
 let `elapsed` = wall-clock seconds since THIS turn's `begin` and `eta` =
