@@ -1,14 +1,48 @@
 #!/usr/bin/env bash
 # PostToolUse hook: nudge the agent if no beacon has been emitted recently,
 # OR if no beacon has been emitted at all in a session that's been alive
-# past a short grace period.
+# past a grace period.
+#
+# Two accuracy constraints discovered in real sessions (2026-06-10 debugging,
+# see skills-progress-beacon README "Nudge paths and rate limiting"):
+#   1. Claude Code persists mid-turn assistant messages to the session JSONL
+#      with multi-minute lag (sometimes never, for text-only mid-turn
+#      messages). A beacon the agent just emitted can be invisible to
+#      claude-walker for minutes. Thresholds must ride that out.
+#   2. PostToolUse fires once per tool call, including per call in a parallel
+#      batch. Without rate limiting one stale window produces a nudge burst
+#      (observed: 10+ identical nudges in recorded incident sessions).
+# Hence: a per-session cooldown gates BOTH nudge paths, and the staleness /
+# grace thresholds are set well above the observed flush lag.
 set -euo pipefail
+
+# Seconds between nudges for one session (both paths share the stamp).
+NUDGE_COOLDOWN=300
+# Stale path: a live (non-end) beacon older than this triggers a nudge.
+# Keep comfortably above typical JSONL flush lag so just-emitted beacons
+# aren't nagged about.
+STALE_AFTER=600
+# Missing path: no beacon at all and the session is older than this.
+GRACE=300
 
 input="$(cat)"
 session_id="$(printf '%s' "$input" | jq -r '.session_id // empty')"
 if [[ -z "$session_id" ]]; then
     echo '{}'
     exit 0
+fi
+
+# Cooldown check up front: if we nudged this session recently (either path),
+# stay silent regardless of beacon state.
+stamp_dir="${TMPDIR:-/tmp}/progress-beacon-nudge"
+stamp="$stamp_dir/$session_id"
+now_epoch="$(date +%s)"
+if [[ -f "$stamp" ]]; then
+    last_nudge="$(cat "$stamp" 2>/dev/null || echo 0)"
+    if [[ "$last_nudge" =~ ^[0-9]+$ ]] && (( now_epoch - last_nudge < NUDGE_COOLDOWN )); then
+        echo '{}'
+        exit 0
+    fi
 fi
 
 walker_out="$(claude-walker beacons-latest --session-id "$session_id" 2>/dev/null || true)"
@@ -29,16 +63,16 @@ if [[ "$beacon" != "null" && -n "$age" && "$age" != "null" ]]; then
     # Only nudge live beacons; an end-beacon means the agent has already
     # closed out and a stale-end is just inactivity, not under-trigger.
     if [[ "$kind" != "end" ]]; then
-        if awk -v a="$age" 'BEGIN{exit !(a > 300)}'; then
+        if awk -v a="$age" -v t="$STALE_AFTER" 'BEGIN{exit !(a > t)}'; then
             minutes=$(awk -v a="$age" 'BEGIN{printf "%d", a/60}')
             needs_nudge=1
-            nudge_msg="No progress beacon emitted in ${minutes}+ minutes. If this turn is non-trivial, please emit a <progress-beacon> 'report' now."
+            nudge_msg="No progress beacon visible in ${minutes}+ minutes (note: beacons can take a few minutes to land in the transcript). If this turn is non-trivial and you haven't emitted one recently, emit a <progress-beacon> 'report' now."
         fi
     fi
 else
     # Missing-beacon path: walker reports no beacon at all. Nudge if the
-    # session has been alive past a short grace period (~90s) so trivial
-    # one-shot turns don't get spammed.
+    # session has been alive past the grace period so trivial one-shot
+    # turns don't get spammed.
     jsonl=""
     for f in "$HOME"/.claude/projects/*/"$session_id".jsonl; do
         if [[ -f "$f" ]]; then
@@ -50,18 +84,19 @@ else
         first_ts="$(jq -r 'select(.timestamp) | .timestamp' "$jsonl" 2>/dev/null | head -1 || true)"
         if [[ -n "$first_ts" ]]; then
             first_epoch="$(date -d "$first_ts" +%s 2>/dev/null || echo 0)"
-            now_epoch="$(date +%s)"
             session_age=$((now_epoch - first_epoch))
-            if [[ "$first_epoch" -gt 0 && "$session_age" -gt 90 ]]; then
+            if [[ "$first_epoch" -gt 0 && "$session_age" -gt "$GRACE" ]]; then
                 minutes=$((session_age / 60))
                 needs_nudge=1
-                nudge_msg="ATTENTION: this session has been running for ${minutes}+ minutes with NO progress-beacon emitted. If this turn is non-trivial (multi-file edits, multi-step research, dispatching subagents, or >2 minutes wall-clock), your NEXT assistant message MUST include a <progress-beacon> 'begin' block before any further tool calls. If the turn is genuinely trivial (one-off Q&A, single-file lookup), ignore this nudge."
+                nudge_msg="This session is ${minutes}+ minutes old with no progress-beacon visible yet. If the current turn is non-trivial (multi-file edits, multi-step research, dispatching subagents, or >2 minutes wall-clock) and you haven't emitted a beacon, include a <progress-beacon> 'begin' block in your next assistant message. If the turn is trivial (one-off Q&A, single-file lookup), ignore this."
             fi
         fi
     fi
 fi
 
 if [[ "$needs_nudge" -eq 1 ]]; then
+    mkdir -p "$stamp_dir" 2>/dev/null || true
+    printf '%s' "$now_epoch" > "$stamp" 2>/dev/null || true
     jq -n --arg msg "$nudge_msg" '{
         hookSpecificOutput: {
             hookEventName: "PostToolUse",
