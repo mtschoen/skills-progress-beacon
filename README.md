@@ -93,5 +93,5 @@ Optional: `beats_left`. All other fields are reserved.
 
 ## Status
 
-v1 ships in 2026-05. Real-session shake-down lives at
-`~/.claude/notes/project_progress_beacon.md`.
+v1 ships in 2026-05. Real-session shake-down is tracked in the author's
+cross-project memory, outside this repo.
