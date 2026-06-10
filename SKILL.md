@@ -1,19 +1,19 @@
 ---
 name: progress-beacon
-description: Use during any non-trivial turn (multi-file edits, multi-step research, planning + implementation, dispatching subagents, or anything you'd ballpark at >2 minutes wall-clock). Periodically emits a `<progress-beacon>` JSON block in the assistant message text so the user's status line can render an ETA. On material drift, surfaces a loud in-line note and continues working — does NOT block the turn for user confirmation.
+description: Use during any non-trivial turn (multi-file edits, multi-step research, planning + implementation, dispatching subagents, or anything you'd ballpark at >2 minutes wall-clock). Periodically emits a `<progress-beacon>` JSON block in the assistant message text so the user's status line can render an ETA. On material drift, surfaces a loud in-line note and continues working - does NOT block the turn for user confirmation.
 ---
 
-# progress-beacon — agent self-pacing for non-trivial turns
+# progress-beacon - agent self-pacing for non-trivial turns
 
 Your user can't tell how long a turn will take. They want a single visible
-answer to "can I close my laptop?" — anchored to wall clock. This skill
+answer to "can I close my laptop?" - anchored to wall clock. This skill
 makes that possible by having you emit a small machine-readable progress
 beacon at key moments. The status line parses it and shows the figure plus
 a calibrated estimate from historical sessions.
 
 ## First action requirement (DEFAULT-ON)
 
-For any non-trivial turn — defined by the criteria below — your VERY FIRST
+For any non-trivial turn - defined by the criteria below - your VERY FIRST
 substantive action is emitting a `<progress-beacon> {"kind": "begin", ...}`
 block in your assistant message text. Not after a few tool calls. Not "once
 I have a clearer estimate." First.
@@ -22,7 +22,7 @@ I have a clearer estimate." First.
 session.** A "turn" = one user prompt + the agent's response to it. If the
 previous turn ended with `kind=end` (or had no beacon at all), the next
 non-trivial turn opens a brand new lifecycle with a fresh `begin`. Do NOT
-skip straight to `report` thinking the work is "continuing" — the status
+skip straight to `report` thinking the work is "continuing" - the status
 line treats `end` as a hard lifecycle terminator and will render a loud
 red `⏱ no begin` until you emit one. The UserPromptSubmit hook reminds
 you when the prior turn closed with an end; act on it.
@@ -31,7 +31,7 @@ If you've already dispatched a tool call without emitting a begin beacon
 and the turn is non-trivial, emit the begin beacon in your NEXT assistant
 message before further tool calls. Recovery is fine; silent omission is not.
 
-The skill is silent ONLY for turns that are *clearly* trivial — one-line
+The skill is silent ONLY for turns that are *clearly* trivial - one-line
 answers, simple Q&A, single-file lookups, exploratory dialog like
 brainstorming. Borderline → emit. The cost of an unneeded `begin` is one
 fenced block; the cost of a missing one is a user staring at a blank
@@ -70,7 +70,7 @@ Optional:
 
 - `beats_left`: discrete steps remaining (when you have a confident count).
 
-Do NOT include `tokens_left`, `tasks`, or other fields — they're reserved
+Do NOT include `tokens_left`, `tasks`, or other fields - they're reserved
 for future use.
 
 ## Lifecycle
@@ -91,7 +91,7 @@ Don't carry an old `begin` across turn boundaries.
 - **End of substantive work** → emit `kind: "end"` with final summary.
   Status line clears the figure. The lifecycle is now closed; the NEXT
   non-trivial turn requires a new `begin`. A `report` emitted after an
-  `end` with no intervening `begin` will render as `⏱ no begin` — the
+  `end` with no intervening `begin` will render as `⏱ no begin` - the
   status line is telling you to fix the omission, not retroactively
   reuse the previous turn's anchor.
 
@@ -116,7 +116,7 @@ under it), prepend a loud in-line note in the same assistant message:
 ```text
 🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨
 
-ETA CREEP — was 15min, now looking like 45min.
+ETA CREEP - was 15min, now looking like 45min.
 
 I'm continuing. **Press ESC and tell me to wrap up** if you'd rather
 I call it here and write a handoff.
@@ -126,7 +126,7 @@ I call it here and write a handoff.
 
 Once you're over the threshold, do NOT re-flash the note on consecutive
 beacons. If your estimate recovers back under it and later crosses again,
-the loud note fires again — that's a genuinely new event worth surfacing.
+the loud note fires again - that's a genuinely new event worth surfacing.
 
 ## What this skill does NOT do
 
