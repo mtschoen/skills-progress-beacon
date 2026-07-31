@@ -1,6 +1,6 @@
 ---
 name: progress-beacon
-description: Use during any non-trivial turn (multi-file edits, multi-step research, planning + implementation, dispatching subagents, or anything you'd ballpark at >2 minutes wall-clock). Periodically emits a `<progress-beacon>` JSON block in the assistant message text so the user's status line can render an ETA. On material drift, surfaces a loud in-line note and continues working - does NOT block the turn for user confirmation.
+description: Use during any non-trivial turn (multi-file edits, multi-step research, planning + implementation, dispatching subagents, or anything you'd ballpark at over 2 minutes wall-clock). Periodically emits a progress-beacon JSON block in the assistant message text so the user's status line can render an ETA. On material drift, surfaces a loud in-line note and continues working - does NOT block the turn for user confirmation.
 ---
 
 # progress-beacon - agent self-pacing for non-trivial turns
