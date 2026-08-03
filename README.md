@@ -46,7 +46,9 @@ error states — see the **Line 3 (beacon)** section of the
    ```
 
    Puts `claude-walker(.exe)` at `~/.local/bin/`. Add that dir to PATH
-   if it isn't there.
+   if it isn't there. Both hooks below also require `jq` on PATH —
+   install it via your platform's package manager (e.g. `brew install jq`,
+   `apt install jq`) if it isn't already present.
 
 3. **`schoen-claude-status` patches** — already merged on `main`; the
    helpers `format_beacon` and `format_calibrated_eta` activate
@@ -86,7 +88,12 @@ fires on each user prompt and the recency nudge after tool calls:
 ```
 
 If the `hooks` block already exists, merge carefully — preserve the
-other entries.
+other entries. (The `update-config` skill, if available, can perform
+this merge for you rather than hand-editing.)
+
+Neither hook is required for the skill's core beacon behavior — that
+comes from `SKILL.md` alone. The hooks are an optional backstop reminder
+layer; skip this section if you don't want the nudges.
 
 ## Nudge paths and rate limiting
 
@@ -106,6 +113,17 @@ prompt while the agent is already pacing).
 Both paths share a per-session cooldown (5 minutes, stamp file under
 `$TMPDIR/progress-beacon-nudge/`), so one stale window produces one
 nudge, not a burst on every tool call of a parallel batch.
+
+Both hooks get the latest beacon by shelling out to
+`claude-walker beacons-latest --session-id <id>`, which returns
+`{"beacon": {"kind": "begin"|"report"|"end", ...}, "age_seconds": N}`
+(or nothing, if no beacon is visible yet). Both calls are wrapped in
+`|| true`, and a missing/empty result is treated the same as "no beacon
+visible" — so if `claude-walker` or `jq` isn't installed, isn't on PATH,
+or errors for any reason, both hooks degrade to a silent no-op (`{}`,
+exit 0). They never block a prompt or tool call; absence of the nudge is
+the only symptom, which is easy to miss if you're relying on the hooks
+and haven't verified the install.
 
 Two facts of life shape those thresholds (learned from the 2026-06
 false-nudge incidents):

@@ -128,6 +128,28 @@ Once you're over the threshold, do NOT re-flash the note on consecutive
 beacons. If your estimate recovers back under it and later crosses again,
 the loud note fires again - that's a genuinely new event worth surfacing.
 
+## Hooks
+
+Two optional shell hooks reinforce this skill from outside the model
+context - see the repo README's "Hook configuration" section for how to
+register them:
+
+- `hooks/prompt-reminder.sh` (`UserPromptSubmit`) - reminds you of the
+  trigger criteria at the start of each prompt, unless a live beacon is
+  already visible.
+- `hooks/recency-nudge.sh` (`PostToolUse`) - nudges when the transcript
+  shows no beacon, or a stale one, past a grace period.
+
+Both require external tooling this skill does not bundle: the
+`claude-walker` CLI (`claude-walker beacons-latest --session-id <id>`,
+returning JSON shaped like `{"beacon": {"kind": "..."}, "age_seconds":
+N}`) and `jq`. If either is missing, unconfigured, or errors, both hooks
+fail open silently (they emit `{}` and exit 0) - they never block a turn,
+they just stop nudging. Neither hook is required for the beacon behavior
+itself: the "First action requirement" above comes from this skill body,
+not from the hooks. Treat the hooks as a backstop reminder, not the
+mechanism that makes beacons happen.
+
 ## What this skill does NOT do
 
 - Does not stop and ask "keep going or wrap?" as a blocking question.
