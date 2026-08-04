@@ -8,7 +8,7 @@
 #   1. Claude Code persists mid-turn assistant messages to the session JSONL
 #      with multi-minute lag (sometimes never, for text-only mid-turn
 #      messages). A beacon the agent just emitted can be invisible to
-#      claude-walker for minutes. Thresholds must ride that out.
+#      agent-walker for minutes. Thresholds must ride that out.
 #   2. PostToolUse fires once per tool call, including per call in a parallel
 #      batch. Without rate limiting one stale window produces a nudge burst
 #      (observed: 10+ identical nudges in recorded incident sessions).
@@ -45,7 +45,7 @@ if [[ -f "$stamp" ]]; then
     fi
 fi
 
-walker_out="$(claude-walker beacons-latest --session-id "$session_id" 2>/dev/null || true)"
+walker_out="$(agent-walker beacons-latest --session-id "$session_id" 2>/dev/null || true)"
 if [[ -z "$walker_out" ]]; then
     echo '{}'
     exit 0

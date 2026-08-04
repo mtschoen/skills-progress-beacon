@@ -128,6 +128,43 @@ Once you're over the threshold, do NOT re-flash the note on consecutive
 beacons. If your estimate recovers back under it and later crosses again,
 the loud note fires again - that's a genuinely new event worth surfacing.
 
+## Hooks
+
+Two optional shell hooks reinforce this skill from outside the model
+context - see the repo README's "Hook configuration" section for how to
+register them:
+
+- `hooks/prompt-reminder.sh` (`UserPromptSubmit`) - reminds you of the
+  trigger criteria at the start of each prompt, unless a live beacon is
+  already visible.
+- `hooks/recency-nudge.sh` (`PostToolUse`) - nudges when the transcript
+  shows no beacon, or a stale one, past a grace period.
+
+Both require external tooling this skill does not bundle: the
+agent-walker CLI (`agent-walker beacons-latest --session-id <id>`,
+returning JSON shaped like `{"beacon": {"kind": "..."}, "age_seconds":
+N}`; the project is [agent-walker](https://github.com/mtschoen/agent-walker/))
+and `jq`.
+
+The two dependencies fail differently, and the two hooks don't degrade
+the same way when agent-walker is missing or erroring (that call is
+wrapped in `|| true`, so it never crashes either hook):
+`hooks/recency-nudge.sh` falls through to `{}` and exit 0 right away -
+a genuine silent no-op, it just stops nudging.
+`hooks/prompt-reminder.sh` loses its only signal for "a beacon is
+already active" and instead emits the reminder unconditionally on
+every prompt - noisy, not silent. There is no other fallback for
+either hook.
+
+A missing `jq` is not silent in either hook - both scripts run under
+`set -euo pipefail`, so an unwrapped `jq` call exits the hook non-zero
+instead of emitting `{}`. Install `jq` before enabling either hook.
+
+Neither hook is required for the beacon behavior itself: the "First
+action requirement" above comes from this skill body, not from the
+hooks. Treat the hooks as a backstop reminder, not the mechanism that
+makes beacons happen.
+
 ## What this skill does NOT do
 
 - Does not stop and ask "keep going or wrap?" as a blocking question.
