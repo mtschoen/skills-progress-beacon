@@ -16,9 +16,7 @@ machine-readable JSON block in its assistant message text:
 
 [agent-walker](https://github.com/mtschoen/agent-walker/) (separate
 repo) parses these from the active session transcript on demand; the
-binary installs as `agent-walker` with `claude-walker` kept as a
-compatibility alias (older installs may expose only the old name; the
-hooks try both). The status line
+binary installs as `agent-walker`. The status line
 ([agent-statusline](https://github.com/mtschoen/agent-statusline),
 separate repo) renders the live
 beacon plus a calibrated ETA derived from a 7-day median of
@@ -32,7 +30,7 @@ transcript shows no recent beacon.
 For the user-facing render — what each field on line 3 of the status
 line means, and how to read the wall-clock anchors, drift colors, and
 error states — see the **Line 3 (beacon)** section of the
-[schoen-claude-status README](https://github.com/mtschoen/schoen-claude-status#what-you-see).
+[agent-statusline README](https://github.com/mtschoen/agent-statusline#what-you-see).
 
 ## Installation (3 components)
 
@@ -45,16 +43,13 @@ error states — see the **Line 3 (beacon)** section of the
    Lands at `~/.claude/skills/progress-beacon/`.
 
 2. **[agent-walker](https://github.com/mtschoen/agent-walker/)** -
-   install the production C++ binary. The installer puts the binary in
-   place under both names, `agent-walker` and the deprecated
-   `claude-walker` compatibility alias:
+   install the production C++ binary:
 
    ```bash
    cd ~/agent-walker && bash install.sh   # or install.bat on Windows
    ```
 
-   Puts `agent-walker(.exe)` (plus the `claude-walker` compatibility
-   copy) at `~/.local/bin/`. Add that dir to PATH
+   Puts `agent-walker(.exe)` at `~/.local/bin/`. Add that dir to PATH
    if it isn't there. Both hooks below also require `jq` on PATH —
    install it via your platform's package manager (e.g. `brew install jq`,
    `apt install jq`) if it isn't already present. There is no fallback
@@ -64,8 +59,8 @@ error states — see the **Line 3 (beacon)** section of the
 
 3. **[agent-statusline](https://github.com/mtschoen/agent-statusline)
    patches** - already merged on `main`; the helpers `format_beacon`
-   and `format_calibrated_eta` activate automatically once either
-   walker binary name is on PATH.
+   and `format_calibrated_eta` activate automatically once the
+   `agent-walker` binary is on PATH.
 
 ## Hook configuration
 
@@ -128,7 +123,7 @@ Both paths share a per-session cooldown (5 minutes, stamp file under
 nudge, not a burst on every tool call of a parallel batch.
 
 Both hooks get the latest beacon by shelling out to
-`claude-walker beacons-latest --session-id <id>`, which returns
+`agent-walker beacons-latest --session-id <id>`, which returns
 `{"beacon": {"kind": "begin"|"report"|"end", ...}, "age_seconds": N}`
 (or nothing, if no beacon is visible yet). That call is wrapped in
 `|| true`, so a missing, unreachable, or erroring agent-walker never
@@ -149,8 +144,8 @@ There is no other fallback for either hook beyond these two behaviors.
 
 The `jq` calls that parse agent-walker's output are not wrapped the
 same way. Both scripts run under `set -euo pipefail`
-(`hooks/prompt-reminder.sh` lines 14, 24, 36; `hooks/recency-nudge.sh`
-lines 29, 55, 56, 63, 85, 101), so a missing `jq` is a hard hook error
+(`hooks/prompt-reminder.sh` lines 14, 23, 35; `hooks/recency-nudge.sh`
+lines 29, 54, 55, 62, 84, 100), so a missing `jq` is a hard hook error
 in either hook: the script exits non-zero instead of emitting `{}`,
 and Claude Code surfaces that as a failed hook rather than a quiet
 no-op. Install `jq` before relying on either hook.

@@ -17,8 +17,7 @@ if [[ -z "$session_id" ]]; then
     exit 0
 fi
 
-walker_bin="$(command -v agent-walker || command -v claude-walker || echo claude-walker)"
-walker_out="$("$walker_bin" beacons-latest --session-id "$session_id" 2>/dev/null || true)"
+walker_out="$(agent-walker beacons-latest --session-id "$session_id" 2>/dev/null || true)"
 beacon_kind=""
 if [[ -n "$walker_out" ]]; then
     beacon_kind="$(printf '%s' "$walker_out" | jq -r '.beacon.kind // empty')"
