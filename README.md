@@ -117,13 +117,18 @@ nudge, not a burst on every tool call of a parallel batch.
 Both hooks get the latest beacon by shelling out to
 `claude-walker beacons-latest --session-id <id>`, which returns
 `{"beacon": {"kind": "begin"|"report"|"end", ...}, "age_seconds": N}`
-(or nothing, if no beacon is visible yet). Both calls are wrapped in
-`|| true`, and a missing/empty result is treated the same as "no beacon
-visible" — so if `claude-walker` or `jq` isn't installed, isn't on PATH,
-or errors for any reason, both hooks degrade to a silent no-op (`{}`,
-exit 0). They never block a prompt or tool call; absence of the nudge is
-the only symptom, which is easy to miss if you're relying on the hooks
-and haven't verified the install.
+(or nothing, if no beacon is visible yet). That call is wrapped in
+`|| true`, so a missing, unreachable, or erroring `claude-walker` fails
+open silently: both hooks fall through to `{}`, exit 0, and the only
+symptom is a nudge that never fires.
+
+The `jq` calls that parse `claude-walker`'s output are not wrapped the
+same way. Both scripts run under `set -euo pipefail`
+(`hooks/prompt-reminder.sh` lines 14, 23, 35; `hooks/recency-nudge.sh`
+lines 29, 54, 55, 62, 100), so a missing `jq` is a hard hook error: the
+script exits non-zero instead of emitting `{}`, and Claude Code surfaces
+that as a failed hook rather than a quiet no-op. Install `jq` before
+relying on either hook; `claude-walker` is the piece that's safe to omit.
 
 Two facts of life shape those thresholds (learned from the 2026-06
 false-nudge incidents):

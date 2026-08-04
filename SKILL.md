@@ -143,12 +143,15 @@ register them:
 Both require external tooling this skill does not bundle: the
 `claude-walker` CLI (`claude-walker beacons-latest --session-id <id>`,
 returning JSON shaped like `{"beacon": {"kind": "..."}, "age_seconds":
-N}`) and `jq`. If either is missing, unconfigured, or errors, both hooks
-fail open silently (they emit `{}` and exit 0) - they never block a turn,
-they just stop nudging. Neither hook is required for the beacon behavior
-itself: the "First action requirement" above comes from this skill body,
-not from the hooks. Treat the hooks as a backstop reminder, not the
-mechanism that makes beacons happen.
+N}`) and `jq`. The two dependencies fail differently: a missing or
+erroring `claude-walker` fails open silently (that call is wrapped in
+`|| true`, so both hooks emit `{}` and exit 0 - they just stop nudging).
+A missing `jq` is not silent - both scripts run under `set -euo
+pipefail`, so an unwrapped `jq` call exits the hook non-zero instead of
+emitting `{}`. Install `jq` before enabling either hook. Neither hook is
+required for the beacon behavior itself: the "First action requirement"
+above comes from this skill body, not from the hooks. Treat the hooks as
+a backstop reminder, not the mechanism that makes beacons happen.
 
 ## What this skill does NOT do
 
