@@ -45,7 +45,8 @@ if [[ -f "$stamp" ]]; then
     fi
 fi
 
-walker_out="$(claude-walker beacons-latest --session-id "$session_id" 2>/dev/null || true)"
+walker_bin="$(command -v agent-walker || command -v claude-walker || echo claude-walker)"
+walker_out="$("$walker_bin" beacons-latest --session-id "$session_id" 2>/dev/null || true)"
 if [[ -z "$walker_out" ]]; then
     echo '{}'
     exit 0

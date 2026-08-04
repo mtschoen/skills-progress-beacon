@@ -141,10 +141,11 @@ register them:
   shows no beacon, or a stale one, past a grace period.
 
 Both require external tooling this skill does not bundle: the
-the agent-walker CLI (invoked as `claude-walker beacons-latest --session-id <id>`,
+agent-walker CLI (`agent-walker beacons-latest --session-id <id>`,
 returning JSON shaped like `{"beacon": {"kind": "..."}, "age_seconds":
 N}`; the project is [agent-walker](https://github.com/mtschoen/agent-walker/),
-the installed binary keeps the old `claude-walker` name) and `jq`.
+older installs expose the binary as `claude-walker`, and the hooks try
+both names) and `jq`.
 
 The two dependencies fail differently, and the two hooks don't degrade
 the same way when agent-walker is missing or erroring (that call is
