@@ -143,15 +143,27 @@ register them:
 Both require external tooling this skill does not bundle: the
 `claude-walker` CLI (`claude-walker beacons-latest --session-id <id>`,
 returning JSON shaped like `{"beacon": {"kind": "..."}, "age_seconds":
-N}`) and `jq`. The two dependencies fail differently: a missing or
-erroring `claude-walker` fails open silently (that call is wrapped in
-`|| true`, so both hooks emit `{}` and exit 0 - they just stop nudging).
-A missing `jq` is not silent - both scripts run under `set -euo
-pipefail`, so an unwrapped `jq` call exits the hook non-zero instead of
-emitting `{}`. Install `jq` before enabling either hook. Neither hook is
-required for the beacon behavior itself: the "First action requirement"
-above comes from this skill body, not from the hooks. Treat the hooks as
-a backstop reminder, not the mechanism that makes beacons happen.
+N}`; the project is [agent-walker](https://github.com/mtschoen/agent-walker/),
+the installed binary keeps the old `claude-walker` name) and `jq`.
+
+The two dependencies fail differently, and the two hooks don't degrade
+the same way when `claude-walker` is missing or erroring (that call is
+wrapped in `|| true`, so it never crashes either hook):
+`hooks/recency-nudge.sh` falls through to `{}` and exit 0 right away -
+a genuine silent no-op, it just stops nudging.
+`hooks/prompt-reminder.sh` loses its only signal for "a beacon is
+already active" and instead emits the reminder unconditionally on
+every prompt - noisy, not silent. There is no other fallback for
+either hook.
+
+A missing `jq` is not silent in either hook - both scripts run under
+`set -euo pipefail`, so an unwrapped `jq` call exits the hook non-zero
+instead of emitting `{}`. Install `jq` before enabling either hook.
+
+Neither hook is required for the beacon behavior itself: the "First
+action requirement" above comes from this skill body, not from the
+hooks. Treat the hooks as a backstop reminder, not the mechanism that
+makes beacons happen.
 
 ## What this skill does NOT do
 

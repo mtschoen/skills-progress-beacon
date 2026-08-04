@@ -14,10 +14,12 @@ machine-readable JSON block in its assistant message text:
 </progress-beacon>
 ```
 
-`claude-walker` (separate repo) parses these from the active session
-transcript on demand. The status line (`schoen-claude-status`, separate
-repo) renders the live beacon plus a calibrated ETA derived from a
-7-day median of `actual_elapsed / begin_eta` ratios.
+[agent-walker](https://github.com/mtschoen/agent-walker/) (separate
+repo) parses these from the active session transcript on demand; the
+installed CLI binary keeps the project's old name, `claude-walker`. The
+status line (`schoen-claude-status`, separate repo) renders the live
+beacon plus a calibrated ETA derived from a 7-day median of
+`actual_elapsed / begin_eta` ratios.
 
 Two hooks keep the agent honest (see "Nudge paths and rate limiting"
 below): a UserPromptSubmit reminder of the trigger criteria at the
@@ -39,16 +41,21 @@ error states — see the **Line 3 (beacon)** section of the
 
    Lands at `~/.claude/skills/progress-beacon/`.
 
-2. **`claude-walker`** — install the production C++ binary:
+2. **[agent-walker](https://github.com/mtschoen/agent-walker/)** -
+   install the production C++ binary. The repo is `agent-walker`; the
+   CLI it installs keeps the project's old name, `claude-walker`:
 
    ```bash
-   cd ~/claude-walker && bash install.sh   # or install.bat on Windows
+   cd ~/agent-walker && bash install.sh   # or install.bat on Windows
    ```
 
    Puts `claude-walker(.exe)` at `~/.local/bin/`. Add that dir to PATH
    if it isn't there. Both hooks below also require `jq` on PATH —
    install it via your platform's package manager (e.g. `brew install jq`,
-   `apt install jq`) if it isn't already present.
+   `apt install jq`) if it isn't already present. There is no fallback
+   if `claude-walker` isn't installed beyond the degraded hook behaviors
+   described below (recency-nudge goes silent, prompt-reminder fires
+   unconditionally): there is no other detection path.
 
 3. **`schoen-claude-status` patches** — already merged on `main`; the
    helpers `format_beacon` and `format_calibrated_eta` activate
@@ -118,17 +125,29 @@ Both hooks get the latest beacon by shelling out to
 `claude-walker beacons-latest --session-id <id>`, which returns
 `{"beacon": {"kind": "begin"|"report"|"end", ...}, "age_seconds": N}`
 (or nothing, if no beacon is visible yet). That call is wrapped in
-`|| true`, so a missing, unreachable, or erroring `claude-walker` fails
-open silently: both hooks fall through to `{}`, exit 0, and the only
-symptom is a nudge that never fires.
+`|| true`, so a missing, unreachable, or erroring `claude-walker` never
+crashes either hook. The two hooks degrade differently, though, and
+only one of them is a plain no-op:
+
+- `hooks/recency-nudge.sh` treats an empty result as "nothing to
+  check" and returns `{}`, exit 0, right away. This one really is a
+  silent no-op: the only symptom is a nudge that never fires.
+- `hooks/prompt-reminder.sh` uses that same result to decide whether a
+  live beacon already exists. An empty result looks identical to "no
+  beacon yet," so the hook can't tell the two apart and falls through
+  to its default behavior: emitting the reminder unconditionally, on
+  every prompt, even mid-turn while a beacon is already active. That's
+  fail-open in the noisy direction, not a silent no-op.
+
+There is no other fallback for either hook beyond these two behaviors.
 
 The `jq` calls that parse `claude-walker`'s output are not wrapped the
 same way. Both scripts run under `set -euo pipefail`
 (`hooks/prompt-reminder.sh` lines 14, 23, 35; `hooks/recency-nudge.sh`
-lines 29, 54, 55, 62, 100), so a missing `jq` is a hard hook error: the
-script exits non-zero instead of emitting `{}`, and Claude Code surfaces
-that as a failed hook rather than a quiet no-op. Install `jq` before
-relying on either hook; `claude-walker` is the piece that's safe to omit.
+lines 29, 54, 55, 62, 84, 100), so a missing `jq` is a hard hook error
+in either hook: the script exits non-zero instead of emitting `{}`,
+and Claude Code surfaces that as a failed hook rather than a quiet
+no-op. Install `jq` before relying on either hook.
 
 Two facts of life shape those thresholds (learned from the 2026-06
 false-nudge incidents):
