@@ -53,13 +53,13 @@ error states — see the **Line 3 (beacon)** section of the
    if it isn't there. Both hooks below also require `jq` on PATH —
    install it via your platform's package manager (e.g. `brew install jq`,
    `apt install jq`) if it isn't already present. There is no fallback
-   if `claude-walker` isn't installed beyond the degraded hook behaviors
+   if agent-walker isn't installed beyond the degraded hook behaviors
    described below (recency-nudge goes silent, prompt-reminder fires
    unconditionally): there is no other detection path.
 
 3. **`schoen-claude-status` patches** — already merged on `main`; the
    helpers `format_beacon` and `format_calibrated_eta` activate
-   automatically once `claude-walker` is on PATH.
+   automatically once the `claude-walker` binary is on PATH.
 
 ## Hook configuration
 
@@ -125,7 +125,7 @@ Both hooks get the latest beacon by shelling out to
 `claude-walker beacons-latest --session-id <id>`, which returns
 `{"beacon": {"kind": "begin"|"report"|"end", ...}, "age_seconds": N}`
 (or nothing, if no beacon is visible yet). That call is wrapped in
-`|| true`, so a missing, unreachable, or erroring `claude-walker` never
+`|| true`, so a missing, unreachable, or erroring agent-walker never
 crashes either hook. The two hooks degrade differently, though, and
 only one of them is a plain no-op:
 
@@ -141,7 +141,7 @@ only one of them is a plain no-op:
 
 There is no other fallback for either hook beyond these two behaviors.
 
-The `jq` calls that parse `claude-walker`'s output are not wrapped the
+The `jq` calls that parse agent-walker's output are not wrapped the
 same way. Both scripts run under `set -euo pipefail`
 (`hooks/prompt-reminder.sh` lines 14, 23, 35; `hooks/recency-nudge.sh`
 lines 29, 54, 55, 62, 84, 100), so a missing `jq` is a hard hook error
@@ -155,10 +155,10 @@ false-nudge incidents):
 - Claude Code persists mid-turn assistant messages to the session
   JSONL with multi-minute lag - sometimes never, for text-only
   mid-turn messages. A beacon the agent just emitted can be invisible
-  to `claude-walker` for minutes, so sub-5-minute thresholds nag about
+  to agent-walker for minutes, so sub-5-minute thresholds nag about
   beacons that were in fact emitted.
 - `end` beacons must be visible for the stale path to stand down.
-  `claude-walker` (>= the 2026-06-10 build) treats `eta_seconds` as
+  agent-walker (>= the 2026-06-10 build) treats `eta_seconds` as
   optional on `kind: "end"` (defaulting to 0), because agents
   routinely omit it there; older walker builds silently dropped such
   end beacons, leaving lifecycles permanently open and the stale

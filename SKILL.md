@@ -141,13 +141,13 @@ register them:
   shows no beacon, or a stale one, past a grace period.
 
 Both require external tooling this skill does not bundle: the
-`claude-walker` CLI (`claude-walker beacons-latest --session-id <id>`,
+the agent-walker CLI (invoked as `claude-walker beacons-latest --session-id <id>`,
 returning JSON shaped like `{"beacon": {"kind": "..."}, "age_seconds":
 N}`; the project is [agent-walker](https://github.com/mtschoen/agent-walker/),
 the installed binary keeps the old `claude-walker` name) and `jq`.
 
 The two dependencies fail differently, and the two hooks don't degrade
-the same way when `claude-walker` is missing or erroring (that call is
+the same way when agent-walker is missing or erroring (that call is
 wrapped in `|| true`, so it never crashes either hook):
 `hooks/recency-nudge.sh` falls through to `{}` and exit 0 right away -
 a genuine silent no-op, it just stops nudging.
