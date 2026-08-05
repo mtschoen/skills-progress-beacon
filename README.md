@@ -78,7 +78,7 @@ each user prompt and the recency nudge after tool calls:
         "hooks": [
           {
             "type": "command",
-            "command": "bash ~/.claude/skills/progress-beacon/hooks/prompt-reminder.sh"
+            "command": "bash ~/.agents/skills/progress-beacon/hooks/prompt-reminder.sh"
           }
         ]
       }
@@ -89,7 +89,7 @@ each user prompt and the recency nudge after tool calls:
         "hooks": [
           {
             "type": "command",
-            "command": "bash ~/.claude/skills/progress-beacon/hooks/recency-nudge.sh"
+            "command": "bash ~/.agents/skills/progress-beacon/hooks/recency-nudge.sh"
           }
         ]
       }
