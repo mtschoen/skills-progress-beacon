@@ -67,9 +67,8 @@ error states — see the **Line 3 (beacon)** section of the
 
 ## Hook configuration
 
-These hooks register via Claude Code's own hook mechanism - add these
-entries to `~/.claude/settings.json` so the prompt reminder fires on
-each user prompt and the recency nudge after tool calls:
+Register the hooks in the agent's settings (Claude Code: `~/.claude/settings.json`)
+so the prompt reminder fires on each user prompt and the recency nudge after tool calls:
 
 ```json
 {
