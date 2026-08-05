@@ -1,7 +1,9 @@
 # skills-progress-beacon
 
-Agent-emitted progress beacons during non-trivial Claude Code turns, plus
-a calibrated "when can I close my laptop?" status-line render.
+Agent-emitted progress beacons during non-trivial agent turns, plus
+a calibrated "when can I close my laptop?" status-line render. Today's
+hook wiring and transcript reader are Claude Code-specific (see below);
+the beacon format itself is agent-agnostic.
 
 ## What it is
 
@@ -40,7 +42,8 @@ error states — see the **Line 3 (beacon)** section of the
    ~/skills-dev/install-skills.sh progress-beacon
    ```
 
-   Lands at `~/.claude/skills/progress-beacon/`.
+   Lands at `~/.agents/skills/progress-beacon/` (or wherever your agent
+   harness reads skills - e.g. `~/.claude/skills/` for Claude Code).
 
 2. **[agent-walker](https://github.com/mtschoen/agent-walker/)** -
    install the production C++ binary:
@@ -64,8 +67,9 @@ error states — see the **Line 3 (beacon)** section of the
 
 ## Hook configuration
 
-Add these entries to `~/.claude/settings.json` so the prompt reminder
-fires on each user prompt and the recency nudge after tool calls:
+These hooks register via Claude Code's own hook mechanism - add these
+entries to `~/.claude/settings.json` so the prompt reminder fires on
+each user prompt and the recency nudge after tool calls:
 
 ```json
 {
