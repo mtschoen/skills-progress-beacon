@@ -43,7 +43,7 @@ error states — see the **Line 3 (beacon)** section of the
    ```
 
    Lands at `~/.agents/skills/progress-beacon/` (or wherever your agent
-   harness reads skills - e.g. `~/.claude/skills/` for Claude Code).
+   harness reads skills from).
 
 2. **[agent-walker](https://github.com/mtschoen/agent-walker/)** -
    install the production C++ binary:
@@ -67,8 +67,8 @@ error states — see the **Line 3 (beacon)** section of the
 
 ## Hook configuration
 
-Register the hooks in the agent's settings (Claude Code: `~/.claude/settings.json`)
-so the prompt reminder fires on each user prompt and the recency nudge after tool calls:
+Register the hooks in the agent's settings so the prompt reminder fires on
+each user prompt and the recency nudge after tool calls:
 
 ```json
 {
