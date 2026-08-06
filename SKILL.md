@@ -1,6 +1,6 @@
 ---
 name: progress-beacon
-description: Use during any non-trivial turn (multi-file edits, multi-step research, planning + implementation, dispatching subagents, or anything you'd ballpark at over 2 minutes wall-clock). Periodically emits a progress-beacon JSON block in the assistant message text so the user's status line can render an ETA. On material drift, surfaces a loud in-line note and continues working - does NOT block the turn for user confirmation.
+description: Use during any non-trivial turn (multi-file edits, multi-step research, planning + implementation, dispatching subagents, or anything you'd ballpark at over 2 minutes wall-clock). Periodically emits a progress-beacon JSON block in the assistant message text so the user's status line can render an ETA. On material drift, surfaces a loud in-line note and continues working - does NOT block the turn for user confirmation. Requires a consumer to render anywhere - the agent-statusline / agent-walker companion tools (see README); without one, beacons are harmless inert text.
 ---
 
 # progress-beacon - agent self-pacing for non-trivial turns
@@ -10,6 +10,11 @@ answer to "can I close my laptop?" - anchored to wall clock. This skill
 makes that possible by having you emit a small machine-readable progress
 beacon at key moments. The status line parses it and shows the figure plus
 a calibrated estimate from historical sessions.
+
+Beacons are consumed by the agent-statusline / agent-walker companion tools
+(install pointers in the README). With no consumer installed, emitted
+beacons are inert text - harmless, but the skill has no payoff until a
+consumer is present.
 
 ## First action requirement (DEFAULT-ON)
 
