@@ -24,7 +24,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - run: pip install ruff mypy pytest
+      - run: pip install ruff==0.15.15 mypy pytest
       - run: ruff check evals/
       - run: mypy evals/ --ignore-missing-imports
       - name: pytest (allow exit 5 = no tests yet)
