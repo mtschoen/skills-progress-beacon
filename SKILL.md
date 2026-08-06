@@ -139,7 +139,11 @@ Two optional shell hooks reinforce this skill from outside the model
 context. The repo README's "Hook configuration" section covers how to
 register them, their external dependencies (the agent-walker CLI and
 `jq`, neither bundled here), and how each one degrades when a dependency
-is missing or erroring:
+is missing or erroring. Before suggesting manual registration, check
+whether the skill pack this skill arrived in provides a hook offer flow
+(a command that checks registration state and records the user's
+yes / no / remind-me-later decision) and offer through it instead, so
+the user is asked at most once:
 
 - `hooks/prompt-reminder.sh` (`UserPromptSubmit`) - reminds you of the
   trigger criteria at the start of each prompt, unless a live beacon is
