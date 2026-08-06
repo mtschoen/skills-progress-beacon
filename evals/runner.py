@@ -25,7 +25,7 @@ EVAL_CASES = [
     },
     {
         "id": "drift-engineered",
-        "prompt": "fix the bug in this function — there are five subtle bugs hiding",
+        "prompt": "fix the bug in this function - there are five subtle bugs hiding",
         "expect_beacon": True,
         "expect_loud_note": True,
         "rationale": "actual scope materially exceeds initial estimate; the agent's own (elapsed+eta)/original>=2 math should cross the material threshold and fire the loud note",

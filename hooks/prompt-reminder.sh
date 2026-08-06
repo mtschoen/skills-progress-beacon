@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # UserPromptSubmit hook: inject a brief reminder of progress-beacon trigger
 # criteria into the agent's context. Fires once per user prompt, before the
-# agent starts any tool calls — the strongest moment to influence first-action
+# agent starts any tool calls - the strongest moment to influence first-action
 # behavior.
 #
 # Conditional: skip injection if the session already has a non-end beacon
-# (skill is firing — no need to remind). Always inject if no beacon yet, or
+# (skill is firing - no need to remind). Always inject if no beacon yet, or
 # if the latest beacon is kind=end (turn boundary; next prompt may be a
 # fresh non-trivial turn).
 set -euo pipefail
@@ -23,7 +23,7 @@ if [[ -n "$walker_out" ]]; then
     beacon_kind="$(printf '%s' "$walker_out" | jq -r '.beacon.kind // empty')"
 fi
 
-# If a live (non-end) beacon already exists, the agent is already pacing —
+# If a live (non-end) beacon already exists, the agent is already pacing -
 # don't add noise.
 if [[ "$beacon_kind" == "begin" || "$beacon_kind" == "report" ]]; then
     echo '{}'

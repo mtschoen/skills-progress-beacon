@@ -29,14 +29,14 @@ below): a UserPromptSubmit reminder of the trigger criteria at the
 start of each prompt, and a PostToolUse recency nudge when the
 transcript shows no recent beacon.
 
-For the user-facing render — what each field on line 3 of the status
+For the user-facing render - what each field on line 3 of the status
 line means, and how to read the wall-clock anchors, drift colors, and
-error states — see the **Line 3 (beacon)** section of the
+error states - see the **Line 3 (beacon)** section of the
 [agent-statusline README](https://github.com/mtschoen/agent-statusline#what-you-see).
 
 ## Installation (3 components)
 
-1. **The skill itself** — installed by skills-dev's installer:
+1. **The skill itself** - installed by skills-dev's installer:
 
    ```bash
    ~/skills-dev/install-skills.sh progress-beacon
@@ -53,7 +53,7 @@ error states — see the **Line 3 (beacon)** section of the
    ```
 
    Puts `agent-walker(.exe)` at `~/.local/bin/`. Add that dir to PATH
-   if it isn't there. Both hooks below also require `jq` on PATH —
+   if it isn't there. Both hooks below also require `jq` on PATH -
    install it via your platform's package manager (e.g. `brew install jq`,
    `apt install jq`) if it isn't already present. There is no fallback
    if agent-walker isn't installed beyond the degraded hook behaviors
@@ -98,11 +98,11 @@ each user prompt and the recency nudge after tool calls:
 }
 ```
 
-If the `hooks` block already exists, merge carefully — preserve the
+If the `hooks` block already exists, merge carefully - preserve the
 other entries. (The `update-config` skill, if available, can perform
 this merge for you rather than hand-editing.)
 
-Neither hook is required for the skill's core beacon behavior — that
+Neither hook is required for the skill's core beacon behavior - that
 comes from `SKILL.md` alone. The hooks are an optional backstop reminder
 layer; skip this section if you don't want the nudges.
 
@@ -177,11 +177,11 @@ Optional: `beats_left`. All other fields are reserved.
 
 ## Layout
 
-- `SKILL.md` — the skill body the agent reads.
-- `hooks/prompt-reminder.sh` — UserPromptSubmit trigger-criteria reminder.
-- `hooks/recency-nudge.sh` — PostToolUse staleness backstop (rate-limited).
-- `evals/` — v1 scaffolding; live grader is a v2 follow-up.
-- `workspace/` — gitignored; per-iteration scratch.
+- `SKILL.md` - the skill body the agent reads.
+- `hooks/prompt-reminder.sh` - UserPromptSubmit trigger-criteria reminder.
+- `hooks/recency-nudge.sh` - PostToolUse staleness backstop (rate-limited).
+- `evals/` - v1 scaffolding; live grader is a v2 follow-up.
+- `workspace/` - gitignored; per-iteration scratch.
 
 ## Status
 

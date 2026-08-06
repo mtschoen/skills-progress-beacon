@@ -4,15 +4,15 @@
 
 `runner.py --list` prints the three canonical cases the skill must
 handle. The actual grader (live or replayed Claude session, beacon
-extraction, loud-note-firing assertion) is a v2 follow-up — v1 ships the
+extraction, loud-note-firing assertion) is a v2 follow-up - v1 ships the
 contract so the grader can be wired against stable case IDs.
 
 ## v1 cases
 
-- `trigger-trivial` — skill must stay silent on a one-line answer.
-- `trigger-nontrivial` — multi-step work; full begin/report/end
+- `trigger-trivial` - skill must stay silent on a one-line answer.
+- `trigger-nontrivial` - multi-step work; full begin/report/end
   lifecycle expected.
-- `drift-engineered` — material scope blow-up; the loud note must fire
+- `drift-engineered` - material scope blow-up; the loud note must fire
   when the agent's own `(elapsed + eta) / original_begin_eta >= 2` (or
   elapsed > 30min) math crosses the threshold, and only on the crossing
   (not re-flashed while it stays over).
